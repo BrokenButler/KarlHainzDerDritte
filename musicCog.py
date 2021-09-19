@@ -73,7 +73,7 @@ class MusicCog(commands.Cog):
             if type(song) == type(True):  # TODO make this better and cleaner
                 await context.send('Could not download the song. Incorrect format.')
             else:
-                await context.message.add_reaction(':+1:')  # TODO test this later
+                # await context.message.add_reaction(':+1:')  # TODO test this later
                 await context.send('Song added to the queue.')
                 self.music_queue.append([song, voice_channel])
 
