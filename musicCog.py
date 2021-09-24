@@ -1,7 +1,6 @@
 import discord
-import nacl
 from discord.ext import commands
-from youtube_dl import YoutubeDL
+from youtube_dlc import YoutubeDL
 
 
 class MusicCog(commands.Cog):
@@ -13,15 +12,18 @@ class MusicCog(commands.Cog):
 
         # 2d array containing [song, channel]
         self.music_queue = []
-        self.YDL_OPTIONS = {'format': 'bestaudio',
-                            'noplaylist': 'True'}
+        self.YDLC_OPTIONS = {'format': '[height <=? 360p]+bestaudio',
+                             'audio-quality': '0',
+                             'extract-audio': 'True',
+                             'noplaylist': 'True',
+                             'geo-bypass': 'True'}
         self.FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
                                'options': '-vn'}
 
         self.vc = ''
 
     def search_yt(self, item):
-        with YoutubeDL(self.YDL_OPTIONS) as ydl:
+        with YoutubeDL(self.YDLC_OPTIONS) as ydl:
             try:
                 info = ydl.extract_info('ytsearch:%s' % item, download=False)['entries'][0]
             except Exception:
