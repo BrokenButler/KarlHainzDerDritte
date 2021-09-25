@@ -2,10 +2,10 @@ import json
 
 from discord.ext import commands
 
-from musicCog import MusicCog
+from music import Music
 
 bot = commands.Bot(command_prefix='-')
-bot.add_cog(MusicCog(bot))
+bot.add_cog(Music(bot))
 
 with open('token.json', 'r') as file:
     data = json.load(file)
