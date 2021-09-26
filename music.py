@@ -421,9 +421,10 @@ class Music(commands.Cog):
         """
 
         player = self.get_player(ctx)
-        player.looping = looping
 
-        if player.looping:
-            await ctx.send(f'**`{ctx.author}`**: Set the player to loop')
-        elif not looping:
-            await ctx.send(f'**`{ctx.author}`**: Set the player not to loop')
+        if not player.looping:
+            player.looping = True
+            await ctx.send(f'**`{ctx.author}`**: Set the player to loop', delete_after=20)
+        elif looping:
+            player.looping = False
+            await ctx.send(f'**`{ctx.author}`**: Set the player not to loop', delete_after=20)
