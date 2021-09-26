@@ -412,12 +412,9 @@ class Music(commands.Cog):
         await self.cleanup(ctx.guild)
 
     @commands.command(name='loop')
-    async def setlooping(self, ctx, *, looping: bool):
+    async def setlooping(self, ctx):
         """Change the players looping behavior.
         Parameters
-        ------------
-        looping: bool [Required]
-            The looping behavior to set the player to. This must be True or False.
         """
 
         player = self.get_player(ctx)
@@ -425,6 +422,6 @@ class Music(commands.Cog):
         if not player.looping:
             player.looping = True
             await ctx.send(f'**`{ctx.author}`**: Set the player to loop', delete_after=20)
-        elif looping:
+        elif player.looping:
             player.looping = False
             await ctx.send(f'**`{ctx.author}`**: Set the player not to loop', delete_after=20)
