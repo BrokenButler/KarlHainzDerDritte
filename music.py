@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import itertools
 import sys
 import traceback
@@ -108,7 +109,7 @@ class MusicPlayer:
         self._channel = ctx.channel
         self._cog = ctx.cog
 
-        self.queue = asyncio.Queue()
+        self.queue = collections.deque()
         self.next = asyncio.Event()
 
         self.np = None  # Now playing message
@@ -128,9 +129,9 @@ class MusicPlayer:
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    source = await self.queue.get()
+                    source = await self.queue.popleft()
                     if self.looping:
-                        await self.queue.put(source)
+                        self.queue.append(source)
             except asyncio.TimeoutError:
                 if self in self._cog.players.values():
                     return self.destroy(self._guild)
@@ -185,10 +186,10 @@ class Music(commands.Cog):
             pass
 
         try:
-            for entry in self.players[guild.id].queue._queue:
+            for entry in self.players[guild.id].queue:
                 if isinstance(entry, YTDLSource):
                     entry.cleanup()
-            self.players[guild.id].queue._queue.clear()
+            self.players[guild.id].queue.clear()
         except KeyError:
             pass
 
@@ -285,7 +286,7 @@ class Music(commands.Cog):
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        await player.queue.put(source)
+        player.queue.append(source)
 
     @commands.command(name='pause')
     async def pause_(self, ctx):
@@ -339,11 +340,11 @@ class Music(commands.Cog):
             return await ctx.send('I am not currently connected to voice!', delete_after=20)
 
         player = self.get_player(ctx)
-        if player.queue.empty():
+        if not player.queue[0]:
             return await ctx.send('There are currently no more queued songs.')
 
         # Grab up to 5 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
+        upcoming = list(itertools.islice(player.queue, 0, 10))
 
         fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
