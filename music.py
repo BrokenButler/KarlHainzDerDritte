@@ -417,7 +417,6 @@ class Music(commands.Cog):
         """Change the players looping behavior.
         Parameters
         """
-
         player = self.get_player(ctx)
 
         if not player.looping:
@@ -426,3 +425,33 @@ class Music(commands.Cog):
         elif player.looping:
             player.looping = False
             await ctx.send(f'**`{ctx.author}`**: Set the player not to loop', delete_after=20)
+
+    @commands.command(name='remove')
+    async def remove(self, ctx, index: int = -1):
+        """Change the player volume.
+        Parameters
+        ------------
+        index: int [Required]
+            The position in the queue that should be removed.
+        """
+        vc = ctx.voice_client
+
+        if not vc or not vc.is_connected():
+            return await ctx.send('I am not currently connected to voice!', delete_after=20)
+
+        player = self.get_player(ctx)
+        if not player.queue[0]:
+            return await ctx.send('The queue is empty.')
+
+        if not player.queue[index - 1]:
+            return await ctx.send(f'No song was found in the {index}. position.')
+
+        removed: player.queue[0]
+        if index == -1:
+            removed = player.queue.pop()
+            return await ctx.send(f'**Removed:** `{removed.source.title}`')
+        else:
+            removed = player.queue[index - 1]
+            player.queue.remove(removed)
+
+        return await ctx.send(f'**Removed:** `{removed.source.title}`')
