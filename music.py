@@ -330,7 +330,7 @@ class Music(commands.Cog):
         await ctx.send(f'**`{ctx.author}`**: Skipped the song!')
 
     @commands.command(name='queue',
-                      aliases=['q', 'playlist'])
+                      aliases=['q'])
     async def queue_info(self, ctx, pos: int = 1, length: int = 10):
         """Retrieve a basic queue of upcoming songs.
         Parameters
