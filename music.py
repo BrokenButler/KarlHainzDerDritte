@@ -1,5 +1,4 @@
 import asyncio
-import collections
 import itertools
 import sys
 import traceback
@@ -109,7 +108,7 @@ class MusicPlayer:
         self._channel = ctx.channel
         self._cog = ctx.cog
 
-        self.queue = collections.deque()
+        self.queue = asyncio.Queue()
         self.next = asyncio.Event()
 
         self.np = None  # Now playing message
@@ -129,9 +128,9 @@ class MusicPlayer:
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    source = await self.queue.popleft()
+                    source = await self.queue.get()
                     if self.looping:
-                        self.queue.append(source)
+                        await self.queue.put(source)
             except asyncio.TimeoutError:
                 if self in self._cog.players.values():
                     return self.destroy(self._guild)
@@ -186,10 +185,10 @@ class Music(commands.Cog):
             pass
 
         try:
-            for entry in self.players[guild.id].queue:
+            for entry in self.players[guild.id].queue._queue:
                 if isinstance(entry, YTDLSource):
                     entry.cleanup()
-            self.players[guild.id].queue.clear()
+            self.players[guild.id].queue._queue.clear()
         except KeyError:
             pass
 
@@ -286,7 +285,7 @@ class Music(commands.Cog):
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        player.queue.append(source)
+        await player.queue.put(source)
 
     @commands.command(name='pause')
     async def pause_(self, ctx):
@@ -347,11 +346,11 @@ class Music(commands.Cog):
             return await ctx.send('I am not currently connected to voice!', delete_after=20)
 
         player = self.get_player(ctx)
-        if not player.queue[0]:
-            return await ctx.send('There are currently no queued songs.')
+        if player.queue.empty():
+            return await ctx.send('There are currently no more queued songs.')
 
         # Grab up to 5 entries from the queue...
-        upcoming = list(itertools.islice(player.queue, pos - 1, length))
+        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
 
         fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
@@ -447,18 +446,18 @@ class Music(commands.Cog):
             return await ctx.send('I am not currently connected to voice!', delete_after=20)
 
         player = self.get_player(ctx)
-        if not player.queue[0]:
+        if not player.queue._queue[0]:
             return await ctx.send('The queue is empty.')
 
-        if not player.queue[index - 1]:
+        if not player.queue._queue[index - 1]:
             return await ctx.send(f'No song was found in the {index}. position.')
 
-        removed: player.queue[0]
+        removed: player.queue._queue[0]
         if index == -1:
-            removed = player.queue.pop()
+            removed = await player.queue.get()
             return await ctx.send(f'**Removed:** `{removed.source.title}`')
         else:
-            removed = player.queue[index - 1]
-            player.queue.remove(removed)
+            removed = player.queue._queue[index - 1]
+            player.queue._queue.remove(removed)
 
         return await ctx.send(f'**Removed:** `{removed.source.title}`')
