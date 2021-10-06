@@ -433,11 +433,11 @@ class Music(commands.Cog):
             await ctx.send(f'**`{ctx.author}`**: Set the player not to loop', delete_after=20)
 
     @commands.command(name='remove')
-    async def remove(self, ctx, index: int = -1):
+    async def remove(self, ctx, pos: int = 0):
         """Change the player volume.
         Parameters
         ------------
-        index: int [Required]
+        pos: int [Default = 0]
             The position in the queue that should be removed.
         """
         vc = ctx.voice_client
@@ -446,18 +446,15 @@ class Music(commands.Cog):
             return await ctx.send('I am not currently connected to voice!', delete_after=20)
 
         player = self.get_player(ctx)
-        if not player.queue._queue[0]:
+        if player.queue.empty():
             return await ctx.send('The queue is empty.')
 
-        if not player.queue._queue[index - 1]:
-            return await ctx.send(f'No song was found in the {index}. position.')
+        if pos > player.queue.qsize():
+            return await ctx.send(f'No song was found in the {pos}. position.')
 
         removed: player.queue._queue[0]
-        if index == -1:
-            removed = await player.queue.get()
-            return await ctx.send(f'**Removed:** `{removed.source.title}`')
-        else:
-            removed = player.queue._queue[index - 1]
-            player.queue._queue.remove(removed)
 
-        return await ctx.send(f'**Removed:** `{removed.source.title}`')
+        removed = player.queue._queue[pos - 1]
+        del player.queue._queue[pos - 1]
+        await ctx.message.delete(delete_after=20)
+        await ctx.send(f'**Removed:** `{removed["title"]}`', delete_after=20)
