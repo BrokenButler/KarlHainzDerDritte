@@ -360,6 +360,7 @@ class Music(commands.Cog):
         fmt = '\n'.join(f'{pos + i}: **`{song["title"]}`**' for i, song in enumerate(upcoming))
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
 
+        await ctx.message.delete(delay=20)
         await ctx.send(embed=embed)
 
     @commands.command(name='now_playing',
