@@ -350,9 +350,9 @@ class Music(commands.Cog):
             return await ctx.send('There are currently no more queued songs.')
 
         # Grab up to 5 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
+        upcoming = list(itertools.islice(player.queue._queue, pos - 1, length))
 
-        fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
+        fmt = '\n'.join(f'{pos - 1 + i}: **`{song["title"]}`**' for i, song in enumerate(upcoming))
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
 
         await ctx.send(embed=embed)
