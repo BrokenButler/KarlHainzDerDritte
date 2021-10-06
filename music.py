@@ -440,7 +440,8 @@ class Music(commands.Cog):
 
         await ctx.message.delete(delay=20)
 
-    @commands.command(name='remove')
+    @commands.command(name='remove',
+                      aliases=['rem', 'delete', 'del'])
     async def remove(self, ctx, pos: int = 0):
         """Change the player volume.
         Parameters
