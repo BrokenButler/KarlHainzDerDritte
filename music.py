@@ -428,9 +428,7 @@ class Music(commands.Cog):
 
     @commands.command(name='loop')
     async def setlooping(self, ctx):
-        """Change the players looping behavior.
-        Parameters
-        """
+        """Change the players looping behavior."""
         player = self.get_player(ctx)
 
         if not player.looping:
