@@ -259,7 +259,7 @@ class Music(commands.Cog):
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
 
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await ctx.send(f'Connected to: **{channel}**', delete_after=20)
 
     @commands.command(name='play',
@@ -287,7 +287,7 @@ class Music(commands.Cog):
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
         await player.queue.put(source)
-        return await ctx.message.delete(delete_after=20)
+        return await ctx.message.delete(delay=20)
 
     @commands.command(name='pause')
     async def pause_(self, ctx):
@@ -300,7 +300,7 @@ class Music(commands.Cog):
             return
 
         vc.pause()
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await ctx.send(f'**`{ctx.author}`**: Paused the song!')
 
     @commands.command(name='resume')
@@ -314,7 +314,7 @@ class Music(commands.Cog):
             return
 
         vc.resume()
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await ctx.send(f'**`{ctx.author}`**: Resumed the song!')
 
     @commands.command(name='skip')
@@ -331,7 +331,7 @@ class Music(commands.Cog):
             return
 
         vc.stop()
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await ctx.send(f'**`{ctx.author}`**: Skipped the song!')
 
     @commands.command(name='queue',
@@ -357,7 +357,7 @@ class Music(commands.Cog):
         # Grab up to 5 entries from the queue...
         upcoming = list(itertools.islice(player.queue._queue, pos - 1, length))
 
-        fmt = '\n'.join(f'{pos - 1 + i}: **`{song["title"]}`**' for i, song in enumerate(upcoming))
+        fmt = '\n'.join(f'{pos + i}: **`{song["title"]}`**' for i, song in enumerate(upcoming))
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
 
         await ctx.send(embed=embed)
@@ -383,7 +383,7 @@ class Music(commands.Cog):
 
         player.np = await ctx.send(f'**Now Playing:** `{vc.source.title}` '
                                    f'requested by `{vc.source.requester}`')
-        return await ctx.message.delete(delete_after=19)
+        return await ctx.message.delete(delay=19)
 
     @commands.command(name='volume',
                       aliases=['vol'])
@@ -408,7 +408,7 @@ class Music(commands.Cog):
             vc.source.volume = vol / 100
 
         player.volume = vol / 100
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await ctx.send(f'**`{ctx.author}`**: Set the volume to **{vol}%**')
 
     @commands.command(name='quit',
@@ -423,7 +423,7 @@ class Music(commands.Cog):
         if not vc or not vc.is_connected():
             return await ctx.send('I am not currently playing anything!', delete_after=20)
 
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await self.cleanup(ctx.guild)
 
     @commands.command(name='loop')
@@ -440,7 +440,7 @@ class Music(commands.Cog):
             player.looping = False
             await ctx.send(f'**`{ctx.author}`**: Set the player not to loop', delete_after=20)
 
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
 
     @commands.command(name='remove')
     async def remove(self, ctx, pos: int = 0):
@@ -466,5 +466,5 @@ class Music(commands.Cog):
 
         removed = player.queue._queue[pos - 1]
         del player.queue._queue[pos - 1]
-        await ctx.message.delete(delete_after=20)
+        await ctx.message.delete(delay=20)
         await ctx.send(f'**Removed:** `{removed["title"]}`', delete_after=20)
