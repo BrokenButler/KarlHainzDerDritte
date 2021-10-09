@@ -287,7 +287,6 @@ class Music(commands.Cog):
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
         await player.queue.put(source)
-        return await ctx.message.delete(delay=20)
 
     @commands.command(name='pause')
     async def pause_(self, ctx):
