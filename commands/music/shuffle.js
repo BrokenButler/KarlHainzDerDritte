@@ -13,6 +13,12 @@ module.exports = {
 
         queue.shuffle();
 
-        return message.channel.send(`Queue shuffled **${queue.tracks.length}** song(s) ! ✅`);
+        return message.channel.send(`Queue shuffled **${queue.tracks.length}** song(s) ! ✅`)
+            .then(msg => {
+                setTimeout(() => {
+                    msg.delete();
+                    message.delete();
+                }, 20000)
+            });
     },
 };

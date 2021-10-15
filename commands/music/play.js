@@ -28,12 +28,7 @@ module.exports = {
         }
 
         message.channel.send(`Loading your ${res.playlist ? 'playlist' : 'track'}... 🎧`)
-            .then(msg => {
-                setTimeout(() => {
-                    msg.delete();
-                    message.delete();
-                }, 20000)
-            })
+            .then()
             .catch(console.error);
 
         res.playlist ? queue.addTracks(res.tracks) : queue.addTrack(res.tracks[0]);
